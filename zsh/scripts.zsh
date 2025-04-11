@@ -33,63 +33,6 @@ while :; do
 done | awk "$awkscript"
 }
 
-
-cpswagger (){
-  # Locate and select the source Swagger file
-  source_file=$(find . -type f -path "*/bin/*FilesTest*" -name "Swagger.json" | fzf --prompt="Select the source Swagger file: ")
-
-  # Check if a source file was selected
-  if [[ -z $source_file ]]; then
-      echo "No source Swagger file selected."
-      exit 1
-  fi
-
-  # Locate and select the target Swagger directory
-  target_file=$(find . -type d -name "bin" -prune -o -type f -path "*RestApi*" -name "Swagger.json" -print | fzf --prompt="Select the target Swagger file: ")
-
-  # Check if a target directory was selected
-  if [[ -z $target_file ]]; then
-      echo "No target Swagger file selected."
-      exit 1
-  fi
-
-  # Copy the source Swagger file to the target directory
-  cp "$source_file" "$target_file"
-  echo "Copied $source_file to $target_file"
-}
-
-cpappsettings (){
-  # Locate and select the source Swagger file
-  source_file=$(find . -type f -path "*/bin/*FilesTest*" -name "appsettings*.json" | fzf --prompt="Select the source appsettings file: ")
-
-  # Check if a source file was selected
-  if [[ -z $source_file ]]; then
-      echo "No source appsettings file selected."
-      exit 1
-  fi
-
-  # Extract the type (syst or prod) from the source file name
-  case $source_file in
-    *syst*) target_type="syst" ;;
-    *prod*) target_type="prod" ;;
-    *) echo "Selected file does not match expected naming conventions ('syst' or 'prod')."; exit 1 ;;
-  esac
-
-  # Locate and select the target Swagger directory
-  target_file=$(find . -type d -name "bin" -prune -o -type f -path "*RestApi*" -name "appsettings*$target_type.json" -print | fzf --prompt="Select the target appsettings file: ")
-
-  # Check if a target directory was selected
-  if [[ -z $target_file ]]; then
-      echo "No target appsettings file selected."
-      exit 1
-  fi
-
-  # Copy the source Swagger file to the target directory
-  cp "$source_file" "$target_file"
-  echo "Copied $source_file to $target_file"
-}
-
-
 smartcp (){
   # Determine the file type based on the parameter
   local file_type="$1"
