@@ -36,7 +36,7 @@ done | awk "$awkscript"
 smartcp (){
   # Determine the file type based on the parameter
   local file_type="$1"
-  local source_pattern target_pattern target_prompt target_type
+  local source_pattern target_pattern target_prompt target_type target_path
 
   case $file_type in
     s)
@@ -47,6 +47,10 @@ smartcp (){
     a)
       source_pattern="appsettings*.json"
       target_prompt="Select the target appsettings file: "
+      ;;
+    d)
+      source_pattern="deployment*.y*ml"
+      target_prompt="Select the target deployment file: "
       ;;
     *)
       echo "Invalid parameter. Use 's' for Swagger or 'a' for appsettings."
@@ -64,17 +68,24 @@ smartcp (){
   fi
 
   # Additional logic for appsettings to determine 'syst' or 'prod'
-  if [[ $file_type == "a" ]]; then
+  if [[ $file_type == "a" || $file_type == "d" ]]; then
     case $source_file in
       *syst*) target_type="syst" ;;
       *prod*) target_type="prod" ;;
       *) echo "Selected file does not match expected naming conventions ('syst' or 'prod')."; exit 1 ;;
     esac
-    target_pattern="appsettings*$target_type.json"
+    target_pattern = "${source_pattern/\*/$taget_type}"
+
+    case $source_file in
+      *RestApi*) target_path="RestApi" ;;
+      *DbUp*) target_path="DbUp" ;;
+      *) echo "Selected file does not match expected file path ('RestApi' or 'DbUp')."; exit 1 ;;
+    esac
+ 
   fi
 
   # Locate and select the target file
-  target_file=$(find . -type d -name "bin" -prune -o -type f -path "*RestApi*" -name "$target_pattern" -print | fzf --prompt="$target_prompt")
+  target_file=$(find . -type d -name "bin" -prune -o -type f -path "*$target_path*" -name "$target_pattern" -print | fzf --prompt="$target_prompt")
 
   # Check if a target file was selected
   if [[ -z $target_file ]]; then
