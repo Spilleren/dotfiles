@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+
+# +----+
+# | ls |
+# +----+
+
+alias ls='ls --color=auto'
+alias l='ls -l'
+alias ll='ls -lahF'
+alias lls='ls -lahFtr'
+alias la='ls -A'
+alias lc='ls -CF'
+
+# +-----+
+# | Zsh |
+# +-----+
+
+alias d='dirs -v'
+for index ({1..9}) alias "$index"="cd +${index}"; unset index
+
+# +------+
+# | grep |
+# +------+
+
+alias grep="grep -i --color=auto"
+
+
+
+# +--------+
+# | Neovim |
+# +--------+
+
+alias vim='nvim'
+alias vi='nvim'
+alias nvimc='rm -I $VIMCONFIG/swap/*'             # clean nvim swap file
+alias nvimcu='rm -I $VIMCONFIG/undo/*'            # clean the vim undo
+alias nviml='nvim -w $VIMCONFIG/vimlog "$@"'      # log the keystrokes 
+alias nvimd='nvim --noplugin -u NONE'             # launch nvim without any plugin or config (nvim debug)
+alias nvimfr='nvim +e /tmp/scratchpad.md -c "set spelllang=fr"'
+alias lvim='\vim -c "set nowrap|syntax off"'        # fast vim for big files / big oneliner
+
+# +-----+
+# | Git |
+# +-----+
+
+alias dtf='git --git-dir="$HOME/.dtf.git" --work-tree="$HOME"'
+
+alias gs='git status'
+alias gss='git status -s'
+alias ga='git add'
+alias gp='git push'
+alias gpf='git push --force'
+alias gprm='git pull --rebase origin master'
+alias gpraise='git blame'
+alias gpo='git push origin'
+alias gpof='git push origin --force-with-lease'
+alias gpofn='git push origin --force-with-lease --no-verify'
+alias gpt='git push --tag'
+alias gtd='git tag --delete'
+alias gtdr='git tag --delete origin'
+alias grb='git branch -r'                                                                           # display remote branch
+alias gplo='git pull origin'
+alias gb='git branch '
+alias gc='git commit'
+alias gca='git commit --amend --no-edit'
+alias gd='git diff'
+alias gco='git checkout '
+alias gl='git log --oneline'
+alias gr='git remote'
+alias grs='git remote show'
+alias glol='git log --graph --abbrev-commit --oneline --decorate'
+alias gclean="git branch --merged | grep  -v '\\*\\|master\\|develop' | xargs -n 1 git branch -d" # Delete local branch merged with master
+alias gblog="git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:red)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:blue)%(committerdate:relative)%(color:reset))'"                                                             # git log for each branches
+
+alias dif="git diff --no-index"           # Diff two files even if not in git repo! Can add -w (don't diff whitespaces)
+
+# +-------+
+# | dbcli |
+# +-------+
+
+alias adfs='dbcli adfs get-access-token'
+alias zuser='dbcli cyberark get-account-password bg5470z'
+alias isfreeze='dbcli lookup freeze'
+alias admin='dbcli ft request-authorisation --access-id "QD-AD-KV" --days 7 --business-need "Access to update Jetbrains rider"'
+#
+# +--------------+
+# | Lars Scripts |
+# +--------------+
+
+alias dn='$LARSSCRIPTS/dn.cmd'
+alias dnb='$LARSSCRIPTS/dnb.cmd'
+alias dnc='$LARSSCRIPTS/dnc.cmd'
+alias dnup='$LARSSCRIPTS/dnup.cmd'
+alias dnt='$LARSSCRIPTS/dnt.cmd'
+
+
+
+alias ..='cd ..'
+
+alias starts='start *.sln'
+

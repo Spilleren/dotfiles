@@ -1,0 +1,48 @@
+#compdef dotnet
+
+# Initialize the completion system
+autoload -Uz compinit
+compinit
+
+_dotnet_commands=(
+  'new:Create a new project, configuration file, or solution'
+  'restore:Restore dependencies specified in the project'
+  'build:Build the project'
+  'publish:Publish the project'
+  'run:Run the project'
+  'test:Run unit tests using the test runner specified in the project'
+  'pack:Create a NuGet package'
+  'clean:Clean the output of the build'
+  'sln:Modify solution files'
+  'tool:Install, uninstall, or update .NET tools'
+  'add:Add reference to the project'
+  'remove:Remove reference from the project'
+  'list:List project references'
+)
+
+_dotnet_options=(
+  '--help:Show help information'
+  '--version:Show version information'
+  '--verbosity:Set the verbosity level'
+)
+
+_dotnet() {
+  local state line
+  typeset -A opt_args
+
+  _arguments -C \
+    '1:command:->command' \
+    '*::options:->options'
+
+  case $state in
+    (command)
+      _describe 'dotnet commands' _dotnet_commands
+      ;;
+    (options)
+      _describe 'dotnet options' _dotnet_options
+      ;;
+  esac
+}
+
+# Register the completion function
+compdef _dotnet dotnet
