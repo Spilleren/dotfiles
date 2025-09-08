@@ -83,17 +83,6 @@ alias zuser='dbcli cyberark get-account-password bg5470z'
 alias isfreeze='dbcli lookup freeze'
 alias admin='dbcli ft request-authorisation --access-id "QD-AD-KV" --days 7 --business-need "Access to update Jetbrains rider"'
 #
-# +--------------+
-# | Lars Scripts |
-# +--------------+
-
-alias dn='$LARSSCRIPTS/dn.cmd'
-alias dnb='$LARSSCRIPTS/dnb.cmd'
-alias dnc='$LARSSCRIPTS/dnc.cmd'
-alias dnup='$LARSSCRIPTS/dnup.cmd'
-alias dnt='$LARSSCRIPTS/dnt.cmd'
-
-
 
 alias ..='cd ..'
 
