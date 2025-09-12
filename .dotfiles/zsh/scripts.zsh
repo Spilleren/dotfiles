@@ -294,3 +294,62 @@ cleanNugetPackages(){
 
   read -r -s -k1 "?Press any key to continue . . . "
 }
+
+dnupall(){
+  run_dnup() {
+    local folder=$1
+    echo "Running dnup.cmd in $folder"
+    (
+      cd "$folder" || exit
+      if [[ git status --porcelain ]]; then
+        git stash -m "Stashed for package updates"
+      git fetch origin
+      if git rev-parse --verify besd/update_packages >/dev/null 2>&1; then
+        echo "Branch 'besd/update_packages' exists. Resetting to origin/master."
+        git switch besd/update_packages &&
+        git reset --hard origin/master
+      else
+        echo "Branch 'besd/update_packages' does not exist. Creating it from origin/master."
+        git switch -c besd/update_packages origin/master
+      fi
+      dnup.cmd
+    )
+  }
+
+  create_pullrequest() {
+    local folder=$1
+    echo "Pushing project in $folder"
+    (cd "$folder" || exit
+      gc -a -m "Update packages" &&
+      gp -u origin besd/update_packages &&
+      pr)
+  }
+
+  folders=$(rg -g "*.sln" -g "*.slnx" --files --no-ignore-vcs $SOURCE | sed 's|\\|/|g' | xargs -I {} dirname {} | sort -u)
+
+  if [[ -z "$folders" ]]; then
+    echo "No folders with .sln or .slnx files found."
+    exit 1
+  fi
+
+  selected_folders=$(echo "$folders" | fzf --multi --prompt="Select folders to run dnup.cmd: ")
+
+  if [[ -z "$selected_folders" ]]; then
+    echo "No folders selected."
+    exit 1
+  fi
+
+  echo "$selected_folders" | while read -r folder; do
+    run_dnup "$folder" &
+  done
+
+  wait
+
+  echo "$selected_folders" | while read -r folder; do
+    create_pullrequest "$folder" &
+  done
+
+  wait
+
+  echo "Done!"
+}

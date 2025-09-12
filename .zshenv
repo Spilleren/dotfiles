@@ -24,7 +24,7 @@ export GOPRIVATE="*"
 export GOBIN="/c/Users/bg5470/.config/go.1.24.2.windows-amd64/go/bin"
 
 # fzf
-export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git"'
+export FZF_DEFAULT_COMMAND='rg --files --no-ignore-vcs --hidden --glob "!.git"'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
 FZF_COLORS="bg+:-1,\

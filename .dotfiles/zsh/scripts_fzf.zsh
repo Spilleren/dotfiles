@@ -2,7 +2,7 @@
 CACHE_FILE="$DOTFILES/zsh/.sln_cache"
 
 update_cache() {
-  find "$SOURCE" -type f -name "*.sln" -print > "$CACHE_FILE"
+find . -type f \( -name "*.sln" -o -name "*.slnx" \) -print > "$CACHE_FILE"
 }
 
 #Function to search for .sln files and open the selected one
