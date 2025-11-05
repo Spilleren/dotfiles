@@ -159,7 +159,16 @@ inoremap <C-j> :action EditorDown<CR>
 nnoremap <C-t> :action ActivateTerminalToolWindow<CR>
 
 "" Leader commands
+
 "" ========================================================
+" delete without yanking
+"nnoremap <leader>d "_d
+"vnoremap <leader>d "_d
+
+" replace currently selected text with default register
+" without yanking it
+vnoremap <leader>p "_dP
+
 
 " Jump around with easymotion
 map <leader>j <Plug>(easymotion-s)

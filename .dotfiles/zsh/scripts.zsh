@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
 
+# Test
 matrix () {
     local lines=$(tput lines)
     cols=$(tput cols)
@@ -63,12 +64,12 @@ smartcp (){
       ;;
   esac
 
-  if [[ -z $(find . -type f -path "*/bin/*FilesTest*" -name "$source_pattern") ]]; then
+  if [[ -z $(rg --files --glob '*/bin/*FilesTest*' -g "$source_pattern") ]]; then
     echo "Running FilesTests"
     dotnet test --filter FullyQualifiedName~ThenEqualToCommittedContent -v q > /dev/null 2>&1
   fi
 
-  source_file=$(find . -type f -path "*/bin/*FilesTest*" -name "$source_pattern" | fzf --prompt="Select the source file: ")
+  source_file=$(rg --files --glob '*/bin/*FilesTest*' -g "$source_pattern" | fzf --prompt="Select the source file: ")
 
   if [[ -z $source_file ]]; then
       echo "No source file selected."
@@ -89,10 +90,9 @@ smartcp (){
       *ZCli*) target_path="ZCli" ;;
       *) echo "Selected file does not match expected file path ('RestApi' or 'DbUp')."; exit 1 ;;
     esac
- 
   fi
 
-  target_file=$(find . -type d -name "bin" -prune -o -type f -path "*$target_path*" -name "$target_pattern" -print | fzf --prompt="$target_prompt")
+  target_file=$(rg --files --glob "*$target_path*" -g "$target_pattern" --ignore-file <(echo "bin") | fzf --prompt="$target_prompt")
 
   if [[ -z $target_file ]]; then
       echo "No target file selected."
@@ -193,7 +193,7 @@ WHERE [User].UserBoId = '${userid}'
 
   echo "### Bank Connections"
   echo "
-SELECT [BankConnection], [Name], [CustomName]
+SELECT [Name], [CustomName]
 FROM [QJ.Server.Backend].[dbo].[BankConnection]
 INNER JOIN [User] ON BankConnection.UserId = [User].Id
 WHERE [User].UserBoId = '${userid}' AND BankConnection.Deleted = 0
@@ -301,8 +301,9 @@ dnupall(){
     echo "Running dnup.cmd in $folder"
     (
       cd "$folder" || exit
-      if [[ git status --porcelain ]]; then
+      if [[ `git status --porcelain` ]]; then
         git stash -m "Stashed for package updates"
+      fi
       git fetch origin
       if git rev-parse --verify besd/update_packages >/dev/null 2>&1; then
         echo "Branch 'besd/update_packages' exists. Resetting to origin/master."
@@ -352,4 +353,29 @@ dnupall(){
   wait
 
   echo "Done!"
+}
+
+ftRequest(){
+  if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <csv_file>"
+    exit 1
+  fi
+
+  input_file="$1"
+
+  if [ ! -f "$input_file" ]; then
+    echo "Error: File '$input_file' not found!"
+    exit 1
+  fi
+
+  filtered_file="filtered_$(input_file)"
+  awk -F';' 'NR==1 || ($4 == "Authorisation" && $12 !~ /(2099|9999/))' "$input_file" > "$filtered_file"
+
+  awk -F';' 'NR > 1 {print $5, $16}' "$filtered_file" | while read -r access_id business_need; do
+    if [[ -n "$access_id" && -n "$business_need" ]]; then
+      dbcli ft request-authorisation --access-id "$access_id" --days 365 --create-or-update --business-need "$business_need"
+    else
+      echo "Skipping row with missing access-id or business-need"
+    fi
+  done
 }

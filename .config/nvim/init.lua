@@ -60,6 +60,7 @@ Plug 'charlespascoe/vim-go-syntax'
 Plug 'devsjc/vim-jb'
 Plug 'doums/darcula'
 Plug 'justinmk/vim-sneak'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 
 call plug#end()
 ]])
@@ -70,6 +71,10 @@ require("toggleterm").setup{
   direction = "float",  -- Use floating window for the terminal
   size = 20,  -- Size of the terminal window
 }
+
+vim.g.mkdp_auto_start = 1
+vim.g.mkdp_echo_preview_url = 1
+
 -- Apply color scheme
 vim.cmd('colorscheme darcula')
 
