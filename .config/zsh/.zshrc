@@ -55,7 +55,7 @@ export PATH
 # +---------+
 
 source $DOTFILES/zsh/scripts.zsh
-
+source $DOTFILES/zsh/scripts_db.zsh
 source $DOTFILES/zsh/scripts_fzf.zsh
 # Bind Ctrl-e to the function
 zle -N fzf_open_sln
