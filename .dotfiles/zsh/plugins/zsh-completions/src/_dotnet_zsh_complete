@@ -1,4 +1,5 @@
 #compdef dotnet_zsh_complete
+compdef _dotnet_zsh_complete zcli
 
 _dotnet_zsh_complete()
 {
@@ -35,5 +36,5 @@ _dotnet_zsh_complete()
 }
 
 # apply this function to each command the dotnet-suggest knows about
-compdef _dotnet_zsh_complete $(dotnet-suggest list)
+compdef _dotnet_zsh_complete zcli
 

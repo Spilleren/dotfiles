@@ -27,11 +27,13 @@ filetype plugin indent on
 
 set surround
 set highlightedyank
+set functiontextobj
 set commentary
 set sneak
 set quickscope
 set nerdtree
 set argtextobj
+set peekabo
 set which-key
 
 autocmd FileType cs setlocal commentstring=////\ %s
@@ -91,6 +93,7 @@ let g:WhichKeyDesc_close_tab = "<leader>q Close active tab"
 let g:WhichKeyDesc_close_all_tabs = "<leader>Q Close other tabs"
 
 let g:WhichKeyDesc_refactoring = "<leader>r Refactoring menu"
+let g:WhichKeyDesc_refactoring_inline = "<leader>ri Inline variable"
 let g:WhichKeyDesc_refactoring_rename = "<leader>rn Rename element"
 let g:WhichKeyDesc_refactoring_method = "<leader>rm Extract method"
 let g:WhichKeyDesc_refactoring_variable = "<leader>rv Introduce variable"
@@ -162,13 +165,19 @@ nnoremap <C-t> :action ActivateTerminalToolWindow<CR>
 
 "" ========================================================
 " delete without yanking
-"nnoremap <leader>d "_d
-"vnoremap <leader>d "_d
+nnoremap <leader>d "_d
+vnoremap <leader>d "_d
 
 " replace currently selected text with default register
 " without yanking it
 vnoremap <leader>p "_dP
 
+" camel and snakecase motion
+map <leader>w [w
+map <leader>b [b
+"map vi<leader>w [bv]
+"map di<leader>w [bd]w
+"map ci<leader>w [bc]w
 
 " Jump around with easymotion
 map <leader>j <Plug>(easymotion-s)
@@ -210,6 +219,7 @@ map <leader>q <action>(CloseContent)
 map <leader>Q <action>(CloseAllEditorsButActive)
 
 " Refactoring
+map <leader>ri <Action>(InlineVariable)
 map <leader>rn <Action>(RenameElement)
 map <leader>rm <Action>(ExtractMethod)
 map <leader>rv <Action>(IntroduceVariable)
