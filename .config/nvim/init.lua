@@ -122,8 +122,15 @@ vim.api.nvim_set_keymap('n', '<leader>r', ':Rg<cr>', { noremap = true, silent = 
 vim.api.nvim_set_keymap('n', '<leader>R', ':Rg<space>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>gb', ':GBranches<cr>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>n', ':NERDTreeFocus<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>x', ':NERDTree<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>x', ':NERDTreeFocus<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-f>', ':NERDTreeFind<CR>', { noremap = true, silent = true })
+
+-- Remove whitespaces
+vim.keymap.set('n', '<F5>', function()
+  local saved_search = vim.fn.getreg('/')
+  vim.cmd([[%s/\s\+$//e]])
+  vim.fn.setreg('/', saved_search)
+end, { desc = 'Remove trailing whitespace' })
 
 -- Key mapping to toggle the terminal in normal mode
 vim.api.nvim_set_keymap('n', '<F12>', '<cmd>ToggleTerm<CR>', { noremap = true, silent = true })
@@ -136,3 +143,11 @@ vim.api.nvim_create_autocmd("TextYankPost", {
         vim.highlight.on_yank()
     end,
 })
+
+vim.api.nvim_create_autocmd("BufEnter", {
+  callback = function()
+    local dir = vim.fn.expand("%:p:h")
+    vim.cmd("lcd " .. dir)
+    end,
+})
+

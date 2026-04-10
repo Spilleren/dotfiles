@@ -214,6 +214,14 @@ map <leader><leader> <Action>(RecentFiles)
 map <leader>fl <action>(RecentLocations)
 map <leader>fs <action>(NewScratchFile)
 
+" Fuzzier navigation
+" map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
+"map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
+"map <Leader>gf <action>(com.mituuz.fuzzier.FuzzierVCS)
+"map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrep)
+"map <Leader>ft <action>(com.mituuz.fuzzier.FuzzyGrepCaseInsensitive)
+
+
 " Close active tab
 map <leader>q <action>(CloseContent)
 map <leader>Q <action>(CloseAllEditorsButActive)

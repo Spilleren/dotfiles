@@ -122,6 +122,145 @@ pr() {
   start chrome $pull_request_url
 }
 
+pr2() {
+local approve=false
+
+  while getopts "ch" opt; do
+    case $opt in
+      a)
+        approve=true
+        ;;
+      h)
+        echo "Usage: pr2 [-c] [-h]"
+        echo "  -c    Approve the PR automatically"
+        echo "  -h    Show this help message"
+        return 0
+        ;;
+      \?)
+        echo "Invalid option: -$OPTARG" >&2
+        echo "Usage: pr2 [-c] [-h]"
+        return 1
+        ;;
+    esac
+  done
+
+  if [[ -z "$AZURE_DEVOPS_PAT" ]]; then
+    echo "Azure DevOps PAT not found. Set AZURE_DEVOPS_PAT environment variable."
+    return 1
+  fi
+
+  if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "Not in a git repository"
+    return 1
+  fi
+
+  local repo_url=$(git config --get remote.origin.url)
+
+  local project_name=$(echo $repo_url | sed -n 's#.*/Main/\([^/]*\)/_git/.*#\1#p')
+  local repo_name=$(echo $repo_url | sed -n 's#.*/_git/\([^/]*\)$#\1#p')
+  local source_branch=$(git rev-parse --abbrev-ref HEAD)
+
+  if [[ -z "$project_name" || -z "$repo_name" ]]; then
+    echo "Could not extract project or repository name from: $repo_url"
+    return 1
+  fi
+
+  if [[ "$source_branch" == "master" ]]; then
+    echo "Cannot create PR from master to master"
+    return 1
+  fi
+
+  local commit_message=$(git log -1 --pretty=format:"%s")
+  local pr_data=$(cat <<EOF
+{
+  "sourceRefName": "refs/heads/$source_branch",
+  "targetRefName": "refs/heads/master",
+  "title": "$commit_message",
+  "description": "$commit_message\n\n---\n*Created via command line*"
+}
+EOF
+)
+
+  echo "Creating pull request: $source_branch → master"
+
+  local api_url="https://azuredevops.danskenet.net/Main/$project_name/_apis/git/repositories/$repo_name/pullrequests?api-version=7.0"
+  local auth_header="Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64)"
+
+  local response=$(curl -s -w "\n%{http_code}" -X POST "$api_url" \
+    -H "Content-Type: application/json" \
+    -H "$auth_header" \
+    -d "$pr_data")
+
+  local http_code=$(echo "$response" | tail -n1)
+  local json_response=$(echo "$response" | sed '$d')
+
+  if [[ "$http_code" != "201" ]]; then
+    echo "Failed to create pull request (HTTP $http_code)"
+    echo "$json_response"
+    return 1
+  fi
+
+  local pr_id=$(echo "$json_response" | grep -o '"pullRequestId":[0-9]*' | cut -d':' -f2)
+  local web_url="https://azuredevops.danskenet.net/Main/$project_name/_git/$repo_name/pullrequest/$pr_id"
+
+
+  local user_response=$(curl -s \
+    -H "$auth_header" \
+    "https://azuredevops.danskenet.net/Main/_apis/connectionData?api-version=7.0-preview")
+
+  local current_user_id=$(echo "$user_response" | grep -o '"authenticatedUser":{"id":"[^"]*"' | cut -d'"' -f6)
+
+  if [[ -z "$current_user_id" ]]; then
+    echo "Could not get user ID, skipping auto complete"
+  else
+
+  local commit_count=$(git rev-list --count origin/master..$source_branch --not master)
+  local merge_strategy
+  if [[ commit_count -gt 1 ]]; then
+    merge_strategy="squash"
+  else
+    merge_strategy="noFastForward"
+  fi
+
+  local update_pr_data=$(cat <<EOF
+{
+  "autoCompleteSetBy": {
+    "id": "$current_user_id"
+  },
+  "completionOptions": {
+    "mergeStrategy": "$merge_strategy",
+    "deleteSourceBranch": true,
+    "bypassPolicy": false,
+    "mergeCommitMessage": "Merged PR $pr_id: $commit_message"
+  }
+}
+EOF
+)
+    local update_api_url="https://azuredevops.danskenet.net/Main/$project_name/_apis/git/repositories/$repo_name/pullrequests/$pr_id?api-version=7.0"
+
+    local update_response=$(curl -s -w "\n%{http_code}" -X PATCH "$update_api_url" \
+      -H "Content-Type: application/json" \
+      -H "$auth_header" \
+      -d "$update_pr_data")
+
+    local update_http_code=$(echo "$update_response" | tail -n1)
+
+    if [[ "$update_http_code" == "200" ]]; then
+      echo "Auto-complete enabled with $merge_strategy strategy"
+    else
+      echo " Failed to enable auto-complete (HTTP $update_http_code)"
+      echo "$(echo "$update_response" | sed '$d')"
+    fi
+  fi
+
+  echo "Pull request #$pr_id created successfully!"
+
+  echo "$web_url" | clip.exe
+  echo "Link copied to clipboard"
+
+  start chrome "$web_url"
+}
+
 base64ToUnicode() {
   local encoded_string="$1"
 
@@ -133,6 +272,10 @@ base64ToUnicode() {
     printf  "$char: "
     printf '%04X ' "'$char"
   done
+}
+
+htmlEncode(){
+  python -c "import sys; print(''.join(f'&#{ord(c)};' for c in sys.argv[1]))" "$1"
 }
 
 mkcd() {

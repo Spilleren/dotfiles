@@ -1,0 +1,71 @@
+#compdef zcli
+
+_zcli()
+{
+    local -a completions
+    local help_output line in_commands=0 in_options=0
+    local cmd desc opts opt help_cmd
+    
+    # Build the help command string
+    # words[1,CURRENT-1] gets all words before the current position
+    if (( CURRENT > 1 )); then
+        help_cmd="${words[1,CURRENT-1]}"
+    else
+        help_cmd="${words[1]}"
+    fi
+    
+    # Get help output using eval and strip Windows carriage returns
+    help_output=$(eval "$help_cmd --help" 2>&1 | tr -d '\r')
+    
+    while IFS= read -r line; do
+        # Detect section headers
+        if [[ "$line" == "Commands:" ]]; then
+            in_commands=1 in_options=0
+            continue
+        elif [[ "$line" == "Options:" ]]; then
+            in_options=1 in_commands=0
+            continue
+        elif [[ -z "$line" ]]; then
+            # Empty line ends current section
+            in_commands=0 in_options=0
+            continue
+        fi
+        
+        if (( in_commands )); then
+            # Parse: "  get-by-id <id>          Get account by id"
+            # Find description after 2+ spaces using regex
+            if [[ "$line" =~ '  '(.+)'  '(.+)$ ]]; then
+                cmd="${match[1]}"
+                cmd="${cmd%%[[:space:]]*}"          # first word only
+                desc="${match[2]}"
+                desc="${desc%% }"                   # trim trailing spaces
+                desc="${desc%"${desc##*[![:space:]]}"}"  # trim all trailing whitespace
+                [[ -n "$cmd" ]] && completions+=("${cmd}:${desc}")
+            fi
+            
+        elif (( in_options )); then
+            # Skip Windows-style help flags and -?
+            [[ "$line" == *"/?"* || "$line" == *"/h"* || "$line" == *"-?"* ]] && continue
+            
+            # Parse: "  -e, --environment <Prod|Syst>  Environment [default: Prod]"
+            # Extract description (after 2+ spaces)
+            if [[ "$line" =~ ^[[:space:]]+(.+)[[:space:]][[:space:]]+([^[:space:]].*)$ ]]; then
+                opts="${match[1]}"
+                desc="${match[2]}"
+                desc="${desc%"${desc##*[![:space:]]}"}"  # trim all trailing whitespace
+                # Remove any <arg> or [arg] specifications from opts
+                opts="${opts%%<*}"
+                opts="${opts%%\[*}"
+                # Split by comma, trim spaces and trailing commas
+                for opt in ${(s:,:)opts}; do
+                    opt="${opt## }"      # trim leading space
+                    opt="${opt%% }"      # trim trailing space
+                    opt="${opt%,}"       # remove trailing comma if any
+                    [[ -n "$opt" && "$opt" == -* ]] && completions+=("${opt}:${desc}")
+                done
+            fi
+        fi
+    done <<< "$help_output"
+    
+    _describe -t completions 'completions' completions && return 0
+}

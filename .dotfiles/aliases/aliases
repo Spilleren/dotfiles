@@ -84,7 +84,12 @@ alias isfreeze='dbcli lookup freeze'
 alias admin='dbcli ft request-authorisation --access-id "QD-AD-KV" --days 7 --business-need "Access to update Jetbrains rider"'
 #
 
+# +-----+
+# | prs |
+# +-----+
+alias prs='prs --repos="X5P0-Accounts/AccountExternal,X5P0-Accounts/AccountInternal,X5P0-Accounts/AccountCallback,X5Y0-JWT-Provider/X5Y0-JWT-Provider"'
+
 alias ..='cd ..'
 
-alias starts='start *.sln'
+alias starts='start *.slnx'
 

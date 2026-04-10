@@ -45,7 +45,7 @@ source $DOTFILES/aliases/aliases
 
 # +---------+
 # | PATH    |
-# +---------+
+# +---------+|
 path+=('$SOURCE/Development/Scripts')
 
 export PATH
@@ -60,6 +60,9 @@ source $DOTFILES/zsh/scripts_fzf.zsh
 # Bind Ctrl-e to the function
 zle -N fzf_open_sln
 bindkey '^e' fzf_open_sln
+# Bind Alt-s to the function
+zle -N fzf_solution_dirs_widget
+bindkey '^[s' fzf_solution_dirs_widget
 # +--------+
 # | PROMPT |
 # +--------+

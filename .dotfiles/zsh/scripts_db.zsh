@@ -3,8 +3,7 @@
 publishZcli (){
 SEARCH_DIR="."
 
-CSPROJ_FILE=$(find $SOURCE -name "*Zcli.csproj" | head -n 1)
-
+CSPROJ_FILE=$(rg --files -g "*Zcli.csproj" $SOURCE | head -n 1)
 if [ -z "$CSPROJ_FILE" ]; then
   echo "No .csproj file found."
   exit 1
@@ -125,17 +124,16 @@ ftRequest(){
     exit 1
   fi
 
-  input_file="$1"
+  local input_file="$1"
 
   if [ ! -f "$input_file" ]; then
     echo "Error: File '$input_file' not found!"
     exit 1
   fi
 
-  filtered_file="filtered_$(input_file)"
-  awk -F';' 'NR==1 || ($4 == "Authorisation" && $12 !~ /(2099|9999/))' "$input_file" > "$filtered_file"
-
-  awk -F';' 'NR > 1 {print $5, $16}' "$filtered_file" | while read -r access_id business_need; do
+  awk -F';' 'NR==1 || ($4 == "Authorisation" && $12 !~ /(2099|9999)/)' "$input_file" | \
+  awk -F';' 'NR > 1 {print $5, $16}' | \
+  while read -r access_id business_need; do
     if [[ -n "$access_id" && -n "$business_need" ]]; then
       dbcli ft request-authorisation --access-id "$access_id" --days 365 --create-or-update --business-need "$business_need"
     else
