@@ -124,6 +124,7 @@ pr() {
 
 pr2() {
 local approve=false
+local squash=false
 
   while getopts "ch" opt; do
     case $opt in
@@ -214,9 +215,9 @@ EOF
     echo "Could not get user ID, skipping auto complete"
   else
 
-  local commit_count=$(git rev-list --count origin/master..$source_branch --not master)
+  local commit_count=$(git rev-list --count --no-merges origin/master..$source_branch)
   local merge_strategy
-  if [[ commit_count -gt 1 ]]; then
+  if [[ $commit_count -gt 1 ]]; then
     merge_strategy="squash"
   else
     merge_strategy="noFastForward"

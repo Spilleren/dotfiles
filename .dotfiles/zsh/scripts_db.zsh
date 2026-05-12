@@ -99,6 +99,27 @@ accountGetMany(){
   echo $response | python -m json.tool
 }
 
+accountGetManyProd(){
+  if [ -z "$1" ]; then
+    echo "Usage: $0 <token>"
+    exit 1
+  fi
+
+  token="$1"
+
+  response=$(curl --location --request GET 'https://userapi4.danskebank.com/prod/external-unauthenticated/x5p0.restapi/v1/accounts?name=true' \
+  --header 'Accept-Language: da' \
+  --header 'X-IBM-Client-Id: ac454eaf7a559c51e950fcc52072c0ba' \
+  --header "X-System-Auth: $token" \
+  --header 'Accept: application/json' \
+  --header 'X-DB-Correlation-Id: E2FB678F-A3B9-4342-A7FB-3FAF0ECC47F4' \
+  --header 'Cookie: NSC_JO5wjeo5ezuajf3didtnpidyi1sutbQ=7ce2a3d9ac461c5f6850bd7b16606b1c98d3eb4d2516160a7312840b92a58a20a17b90f8; NSC_JOhh3xdxcfns1g1dbfvu01ckepgwzd0=7ce2a3d9c1d4de09fe1ba6e62397fa10b441b0a7ce6af8364b95f403582e13bebf255a83; NSC_JOumuvprcioysshdslca35d5q02mze0=7ce2a3d986e41ed0ce99350cbf806b8c56463f65e16f7a57be22c2358ce73352a3a8f865; a30618e0b560962902e2293718178277=c66ddd548231af986d73935f38b23546')  
+
+  echo $response 
+}
+
+
+
 accountGetManyLocal(){
   if [ -z "$1" ]; then
     echo "Usage: $0 <token>"
@@ -132,12 +153,12 @@ ftRequest(){
   fi
 
   awk -F';' 'NR==1 || ($4 == "Authorisation" && $12 !~ /(2099|9999)/)' "$input_file" | \
-  awk -F';' 'NR > 1 {print $5, $16}' | \
-  while read -r access_id business_need; do
+  awk -F';' 'NR > 1 {print NR, $5, $16}' | \
+  while read -r line_num access_id business_need; do
     if [[ -n "$access_id" && -n "$business_need" ]]; then
-      dbcli ft request-authorisation --access-id "$access_id" --days 365 --create-or-update --business-need "$business_need"
+      #dbcli ft request-authorisation --access-id "$access_id" --days 365 --create-or-update --business-need "$business_need"
     else
-      echo "Skipping row with missing access-id or business-need"
+      echo "Skipping row $line_num with missing access-id or business-need"
     fi
   done
 }
