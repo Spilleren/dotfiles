@@ -1,6 +1,7 @@
 export TMPPREFIX="$TMPDIR"
 fpath=($DOTFILES/zsh/plugins $fpath)
-
+export PATH=$PATH:/opt/rocm/bin
+export PATH=$PATH:/home/bes/.cargo/bin
 
 # +------------+
 # | COMPLETION |
@@ -47,6 +48,9 @@ source $DOTFILES/aliases/aliases
 # | PATH    |
 # +---------+
 path+=('$SOURCE/Development/Scripts')
+path+=('$HOME/bin')
+path+=('$HOME/bin')
+path+=('$HOME/bin')
 
 export PATH
 
@@ -123,6 +127,10 @@ bindkey -M vicmd v edit-command-line
 # +-----+
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source /usr/share/fzf/key-bindings.zsh
+source /usr/share/fzf/completion.zsh
+
+
 
 # +---------+
 # | BINDING |
@@ -137,3 +145,7 @@ bindkey -M vicmd '^v' edit-command-line
 
 source $DOTFILES/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
+eval "$(zoxide init zsh)"
+
+# opencode
+export PATH=/home/bes/.opencode/bin:$PATH
